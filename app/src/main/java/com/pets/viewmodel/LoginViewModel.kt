@@ -27,17 +27,17 @@ class LoginViewModel @Inject constructor() : ViewModel() {
 
             LoginEvent.OnSuccess -> {}
             is LoginEvent.OnLogin -> {
-                viewModelScope.launch { onExecuteLogin(event.email, event.password) }
+                viewModelScope.launch { onExecuteLogin(event.email) }
             }
         }
     }
 
-    private fun onExecuteLogin(email: String, password: String) {
+    private fun onExecuteLogin(email: String) {
         Log.d("onExecuteLogin", "Execute login")
 
         uiState = try {
             val users = Gson().fromJson("", Array<Users>::class.java)
-            val filterUsers = users.filter { it.email == email && it.password == password }
+            val filterUsers = users.filter { it.email == email }
 
             if (filterUsers.isEmpty()) {
                 throw Exception("Usuário não encontrado!")
@@ -59,7 +59,7 @@ data class LoginUiState(
 
 sealed class LoginEvent {
     data class OnUpdateStatus(val status: LoginStatus) : LoginEvent()
-    data class OnLogin(val email: String, val password: String) : LoginEvent()
+    data class OnLogin(val email: String) : LoginEvent()
 
     object OnSuccess : LoginEvent()
     object OnFail : LoginEvent()

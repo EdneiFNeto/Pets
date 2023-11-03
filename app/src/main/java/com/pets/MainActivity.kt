@@ -1,7 +1,9 @@
 package com.pets
 
+import android.hardware.camera2.params.DynamicRangeProfiles
 import android.os.Bundle
 import android.util.Log
+import android.util.Patterns
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.Image
@@ -17,11 +19,15 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Info
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -39,19 +45,27 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.constraintlayout.compose.ConstraintLayout
+import androidx.core.graphics.BlendModeColorFilterCompat
+import androidx.core.graphics.BlendModeCompat
 import androidx.hilt.navigation.compose.hiltViewModel
+import com.airbnb.lottie.LottieProperty
 import com.airbnb.lottie.compose.LottieAnimation
 import com.airbnb.lottie.compose.LottieCompositionSpec
 import com.airbnb.lottie.compose.LottieConstants
+import com.airbnb.lottie.compose.LottieDynamicProperties
 import com.airbnb.lottie.compose.rememberLottieComposition
+import com.airbnb.lottie.compose.rememberLottieDynamicProperties
+import com.airbnb.lottie.compose.rememberLottieDynamicProperty
 import com.pets.ui.theme.PetsTheme
 import com.pets.ui.theme.albanoRegular
+import com.pets.ui.theme.robotoLight
 import com.pets.ui.theme.robotoRegular
 import com.pets.viewmodel.LoginEvent
 import com.pets.viewmodel.LoginStatus
@@ -85,8 +99,6 @@ fun MainComponent(
     val uiState = viewModel.uiState
     val handleEvent = viewModel::handleEvent
 
-    Log.d("MainComponent", "Status: ${uiState.status}")
-
     Column(
         modifier = Modifier
             .fillMaxSize(),
@@ -112,8 +124,8 @@ fun ListPetsComponent(handleEvent: (event: LoginEvent) -> Unit) {
 fun LoginComponent(
     handleEvent: (event: LoginEvent) -> Unit
 ) {
-    val textPassword = remember { mutableStateOf(TextFieldValue("")) }
     val textEmail = remember { mutableStateOf(TextFieldValue("")) }
+    var isErrorEmail by remember { mutableStateOf(false) }
 
     Column(
         modifier = Modifier
@@ -163,7 +175,7 @@ fun LoginComponent(
             Column(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(250.dp)
+                    .height(200.dp)
                     .padding(12.dp),
                 horizontalAlignment = Alignment.CenterHorizontally,
                 verticalArrangement = Arrangement.Center
@@ -175,17 +187,27 @@ fun LoginComponent(
                         .background(Color.Transparent)
                         .padding(vertical = 4.dp, horizontal = 12.dp),
                     text = textEmail,
-                    label = "E-mail"
+                    label = "E-mail",
+                    isError = isErrorEmail,
+                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email),
+                    onValueChange = {
+                        textEmail.value = it
+                        isErrorEmail = if (it.text.isNotEmpty())
+                            !Patterns.EMAIL_ADDRESS.matcher(it.text).matches()
+                        else
+                            false
+                    }
                 )
 
-                TextFieldComponent(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .background(Color.Transparent)
-                        .padding(vertical = 4.dp, horizontal = 12.dp),
-                    textPassword,
-                    label = "Senha"
-                )
+                if (isErrorEmail) {
+                    Text(
+                        text = "Campo e-mail inválido!",
+                        color = Color.Red,
+                        modifier = Modifier.padding(start = 16.dp),
+                        textAlign = TextAlign.Start,
+                        fontFamily = robotoLight
+                    )
+                }
             }
         }
 
@@ -198,7 +220,13 @@ fun LoginComponent(
             colors = ButtonDefaults.buttonColors(Color.Black),
             shape = RoundedCornerShape(8.dp),
             onClick = {
-                handleEvent(LoginEvent.OnLogin(textEmail.value.text, textPassword.value.text))
+                if (!isErrorEmail) {
+                    handleEvent(
+                        LoginEvent.OnLogin(textEmail.value.text)
+                    )
+                } else {
+                    isErrorEmail = true
+                }
             }) {
             Text(text = "Login", color = Color.White)
         }
@@ -209,24 +237,43 @@ fun LoginComponent(
 private fun TextFieldComponent(
     modifier: Modifier,
     text: MutableState<TextFieldValue>,
-    label: String
+    label: String,
+    isError: Boolean,
+    keyboardOptions: KeyboardOptions,
+    onValueChange: (TextFieldValue) -> Unit
 ) {
     TextField(
         modifier = modifier,
         shape = RoundedCornerShape(8.dp),
         value = text.value,
-        onValueChange = {
-            text.value = it
-        },
+        onValueChange = onValueChange,
         label = { Text(text = label) },
         placeholder = { Text(text = label) },
+        keyboardOptions = keyboardOptions,
         colors = TextFieldDefaults.colors(
             disabledPlaceholderColor = Color.Black,
             disabledTextColor = Color.Black,
             disabledLabelColor = Color.Black,
             focusedContainerColor = Color.Transparent,
-            unfocusedContainerColor = Color.Transparent
-        )
+            unfocusedContainerColor = Color.Transparent,
+            errorContainerColor = Color.Transparent,
+            errorTextColor = Color.Black,
+            focusedTextColor = Color.Black,
+            errorCursorColor = Color.Black,
+            errorLabelColor = Color.Black,
+            errorPlaceholderColor = Color.Black,
+            focusedLabelColor = Color.Black,
+            focusedPlaceholderColor = Color.Black,
+            unfocusedPlaceholderColor = Color.Black,
+            unfocusedLabelColor = Color.Black,
+            unfocusedTextColor = Color.Black,
+            errorSupportingTextColor = Color.Black
+        ),
+        trailingIcon = {
+            if (isError)
+                Icon(Icons.Filled.Info, "error", tint = Color.Red)
+        },
+        isError = isError,
     )
 }
 
@@ -249,7 +296,7 @@ fun LoaderComponent(
         val (text, lottie) = createRefs()
         when (uiState.status) {
             LoginStatus.FAIL -> {
-                if(isVisible) {
+                if (isVisible) {
                     Text(
                         modifier = Modifier
                             .fillMaxWidth()
@@ -272,7 +319,7 @@ fun LoaderComponent(
                     end.linkTo(parent.end)
                     bottom.linkTo(parent.bottom)
                 }) {
-                    LottieComponent(id = R.raw.cat_error)
+                    LottieComponent(id = R.raw.cat_error, dynamicProperties = null)
                 }
             }
 
@@ -290,12 +337,25 @@ fun SplashScreenComponent(
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .background(color = colorResource(id = R.color.colorBgScreen))
+            .background(color = colorResource(id = R.color.colorBgScreen)),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.Center
     ) {
-        Column {
-            LottieComponent(id = R.raw.dogs)
-            OnReturnLogin(handleEvent)
-        }
+        val dynamicProperties = rememberLottieDynamicProperties(
+            rememberLottieDynamicProperty(
+                property = LottieProperty.COLOR_FILTER,
+                value = BlendModeColorFilterCompat.createBlendModeColorFilterCompat(
+                    R.color.white,
+                    BlendModeCompat.SRC_ATOP
+                ),
+                keyPath = arrayOf(
+                    "**"
+                )
+            )
+        )
+
+        LottieComponent(id = R.raw.ic_loading, dynamicProperties)
+        OnReturnLogin(handleEvent)
     }
 }
 
@@ -310,11 +370,13 @@ private fun OnReturnLogin(
 }
 
 @Composable
-private fun LottieComponent(id: Int) {
+private fun LottieComponent(id: Int, dynamicProperties: LottieDynamicProperties?) {
     val composition by rememberLottieComposition(LottieCompositionSpec.RawRes(id))
+
     LottieAnimation(
         composition = composition,
         iterations = LottieConstants.IterateForever,
+        dynamicProperties = dynamicProperties
     )
 }
 
