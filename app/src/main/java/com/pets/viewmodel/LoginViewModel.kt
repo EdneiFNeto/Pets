@@ -1,22 +1,53 @@
 package com.pets.viewmodel
 
+import android.app.Application
+import android.os.Looper
 import android.util.Log
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
-import androidx.lifecycle.ViewModel
+import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import com.google.gson.Gson
+import com.google.gson.reflect.TypeToken
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch
+import java.io.IOException
+import java.util.logging.Handler
 import javax.inject.Inject
-import kotlin.Exception
 
 @HiltViewModel
-class LoginViewModel @Inject constructor() : ViewModel() {
+class LoginViewModel @Inject constructor(
+    application: Application
+) : AndroidViewModel(application) {
+
+    private val context
+        get() = getApplication<Application>()
 
     var uiState by mutableStateOf(LoginUiState())
         private set
+
+    init {
+        readerJsonFile()
+    }
+
+    private fun readerJsonFile(): List<Users> {
+        val jsonString = try {
+            context.assets.open("user.json")
+                .bufferedReader()
+                .use { it.readText() }
+        } catch (e: IOException) {
+            e.printStackTrace()
+            null
+        }
+
+        val listCountryType = object : TypeToken<List<Users>>() {}.type
+        val fromJson = Gson().fromJson<List<Users>>(jsonString, listCountryType)
+        Log.d("Reader", "fromJson $fromJson")
+        uiState = uiState.copy(users = fromJson)
+        return fromJson ?: arrayListOf()
+    }
 
     fun handleEvent(event: LoginEvent) {
         when (event) {
@@ -27,7 +58,10 @@ class LoginViewModel @Inject constructor() : ViewModel() {
 
             LoginEvent.OnSuccess -> {}
             is LoginEvent.OnLogin -> {
-                viewModelScope.launch { onExecuteLogin(event.email) }
+                viewModelScope.launch {
+                    uiState = uiState.copy(status = LoginStatus.LOADER)
+                    onExecuteLogin(event.email)
+                }
             }
         }
     }
@@ -35,18 +69,19 @@ class LoginViewModel @Inject constructor() : ViewModel() {
     private fun onExecuteLogin(email: String) {
         Log.d("onExecuteLogin", "Execute login")
 
-        uiState = try {
-            val users = Gson().fromJson("", Array<Users>::class.java)
-            val filterUsers = users.filter { it.email == email }
+        try {
+            val filterUsers = uiState.users.filter { it.email == email }
 
             if (filterUsers.isEmpty()) {
                 throw Exception("Usuário não encontrado!")
             }
 
-            uiState.copy(status = LoginStatus.SUCCESS)
+            android.os.Handler(Looper.getMainLooper()).postDelayed({
+                uiState = uiState.copy(status = LoginStatus.SUCCESS)
+            }, 3000)
         } catch (e: Exception) {
             e.printStackTrace()
-            uiState.copy(
+            uiState = uiState.copy(
                 status = LoginStatus.FAIL
             )
         }
@@ -54,7 +89,9 @@ class LoginViewModel @Inject constructor() : ViewModel() {
 }
 
 data class LoginUiState(
-    val status: LoginStatus = LoginStatus.NONE
+    val status: LoginStatus = LoginStatus.NONE,
+    val users: List<Users> = arrayListOf(),
+    val pets:List<Pets> = arrayListOf(Pets(name = "Jhon", age = 7))
 )
 
 sealed class LoginEvent {
@@ -73,4 +110,5 @@ enum class LoginStatus {
     SUCCESS
 }
 
-data class Users(val email: String, val password: String)
+data class Users(val email: String, val name: String)
+data class Pets(val name: String, val age: Int)

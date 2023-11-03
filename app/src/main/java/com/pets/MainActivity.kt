@@ -1,8 +1,6 @@
 package com.pets
 
-import android.hardware.camera2.params.DynamicRangeProfiles
 import android.os.Bundle
-import android.util.Log
 import android.util.Patterns
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -18,6 +16,7 @@ import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
@@ -27,6 +26,7 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.CardElevation
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
@@ -42,7 +42,9 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.input.KeyboardType
@@ -52,17 +54,11 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.constraintlayout.compose.ConstraintLayout
-import androidx.core.graphics.BlendModeColorFilterCompat
-import androidx.core.graphics.BlendModeCompat
 import androidx.hilt.navigation.compose.hiltViewModel
-import com.airbnb.lottie.LottieProperty
 import com.airbnb.lottie.compose.LottieAnimation
 import com.airbnb.lottie.compose.LottieCompositionSpec
 import com.airbnb.lottie.compose.LottieConstants
-import com.airbnb.lottie.compose.LottieDynamicProperties
 import com.airbnb.lottie.compose.rememberLottieComposition
-import com.airbnb.lottie.compose.rememberLottieDynamicProperties
-import com.airbnb.lottie.compose.rememberLottieDynamicProperty
 import com.pets.ui.theme.PetsTheme
 import com.pets.ui.theme.albanoRegular
 import com.pets.ui.theme.robotoLight
@@ -108,7 +104,7 @@ fun MainComponent(
         when (uiState.status) {
             LoginStatus.NONE -> SplashScreenComponent(handleEvent)
             LoginStatus.LOGIN -> LoginComponent(handleEvent)
-            LoginStatus.SUCCESS -> ListPetsComponent(handleEvent)
+            LoginStatus.SUCCESS -> ListPetsComponent(uiState)
             LoginStatus.LOADER,
             LoginStatus.FAIL -> LoaderComponent(uiState, handleEvent)
         }
@@ -116,8 +112,140 @@ fun MainComponent(
 }
 
 @Composable
-fun ListPetsComponent(handleEvent: (event: LoginEvent) -> Unit) {
+fun ListPetsComponent(
+    uiState: LoginUiState
+) {
+    Row(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(colorResource(id = R.color.colorBgScreen)),
+        horizontalArrangement = Arrangement.SpaceBetween,
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Card(
+            elevation = CardDefaults.cardElevation(
+                defaultElevation = 10.dp
+            ),
+            modifier = Modifier
+                .weight(1f)
+                .padding(horizontal = 4.dp, vertical = 4.dp),
+            shape = RoundedCornerShape(8.dp),
+            colors = CardDefaults.cardColors(colorResource(id = R.color.white))
+        ) {
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(160.dp)
+                    .padding(12.dp),
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.Center
+            ) {
+                Image(
+                    contentScale = ContentScale.Crop,
+                    modifier = Modifier
+                        .size(90.dp)
+                        .padding(horizontal = 4.dp),
+                    painter = painterResource(id = R.drawable.ic_dog),
+                    contentDescription = null
+                )
 
+                Text(
+                    text = "Dogs",
+                    color = Color.Black,
+                    fontSize = 18.sp,
+                    fontFamily = robotoRegular,
+                    textAlign = TextAlign.Start
+                )
+            }
+        }
+
+        Card(
+            elevation = CardDefaults.cardElevation(
+                defaultElevation = 10.dp
+            ),
+            modifier = Modifier
+                .weight(1f)
+                .padding(horizontal = 4.dp, vertical = 4.dp),
+            shape = RoundedCornerShape(8.dp),
+            colors = CardDefaults.cardColors(colorResource(id = R.color.white))
+        ) {
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(160.dp)
+                    .padding(12.dp),
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.Center
+            ) {
+                Image(
+                    contentScale = ContentScale.Crop,
+                    modifier = Modifier
+                        .size(90.dp)
+                        .padding(horizontal = 4.dp),
+                    painter = painterResource(id = R.drawable.ic_card_cat),
+                    contentDescription = null
+                )
+
+                Text(
+                    text = "Cats",
+                    color = Color.Black,
+                    fontSize = 18.sp,
+                    fontFamily = robotoRegular,
+                    textAlign = TextAlign.Start
+                )
+            }
+        }
+    }
+}
+
+@Composable
+fun ListDogs(uiState: LoginUiState) {
+    uiState.pets.forEach {
+        Card(
+            elevation = CardDefaults.cardElevation(
+                defaultElevation = 10.dp
+            ),
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 12.dp, vertical = 4.dp),
+            shape = RoundedCornerShape(8.dp),
+        ) {
+
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.Start,
+            ) {
+                Image(
+                    contentScale = ContentScale.Crop,
+                    modifier = Modifier
+                        .clip(CircleShape)
+                        .padding(top = 24.dp, start = 8.dp),
+                    painter = painterResource(id = R.drawable.ic_dog),
+                    contentDescription = null
+                )
+
+                Column(
+                    modifier = Modifier
+                        .padding(horizontal = 12.dp, vertical = 24.dp)
+                ) {
+                    Text(
+                        text = it.name,
+                        color = Color.Black,
+                        fontSize = 18.sp,
+                        fontFamily = robotoRegular,
+                        textAlign = TextAlign.Start
+                    )
+                    Text(
+                        text = "${it.age} de Idade",
+                        color = Color.Black,
+                        fontSize = 16.sp,
+                        fontFamily = robotoLight,
+                        textAlign = TextAlign.Start
+                    )
+                }
+            }
+        }
+    }
 }
 
 @Composable
@@ -319,7 +447,18 @@ fun LoaderComponent(
                     end.linkTo(parent.end)
                     bottom.linkTo(parent.bottom)
                 }) {
-                    LottieComponent(id = R.raw.cat_error, dynamicProperties = null)
+                    LottieComponent(id = R.raw.cat_error)
+                }
+            }
+
+            LoginStatus.LOADER -> {
+                Column(modifier = Modifier.constrainAs(lottie) {
+                    start.linkTo(parent.start)
+                    end.linkTo(parent.end)
+                    bottom.linkTo(parent.bottom)
+                    top.linkTo(parent.top)
+                }) {
+                    LottieComponent(id = R.raw.ic_loading)
                 }
             }
 
@@ -341,20 +480,7 @@ fun SplashScreenComponent(
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center
     ) {
-        val dynamicProperties = rememberLottieDynamicProperties(
-            rememberLottieDynamicProperty(
-                property = LottieProperty.COLOR_FILTER,
-                value = BlendModeColorFilterCompat.createBlendModeColorFilterCompat(
-                    R.color.white,
-                    BlendModeCompat.SRC_ATOP
-                ),
-                keyPath = arrayOf(
-                    "**"
-                )
-            )
-        )
-
-        LottieComponent(id = R.raw.ic_loading, dynamicProperties)
+        LottieComponent(id = R.raw.ic_loading)
         OnReturnLogin(handleEvent)
     }
 }
@@ -370,13 +496,12 @@ private fun OnReturnLogin(
 }
 
 @Composable
-private fun LottieComponent(id: Int, dynamicProperties: LottieDynamicProperties?) {
+private fun LottieComponent(id: Int) {
     val composition by rememberLottieComposition(LottieCompositionSpec.RawRes(id))
 
     LottieAnimation(
         composition = composition,
-        iterations = LottieConstants.IterateForever,
-        dynamicProperties = dynamicProperties
+        iterations = LottieConstants.IterateForever
     )
 }
 
