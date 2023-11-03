@@ -1,6 +1,7 @@
 package com.pets
 
 import android.os.Bundle
+import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.Image
@@ -28,24 +29,29 @@ import androidx.compose.material3.TextField
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.input.TextFieldValue
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.airbnb.lottie.compose.LottieAnimation
 import com.airbnb.lottie.compose.LottieCompositionSpec
 import com.airbnb.lottie.compose.LottieConstants
 import com.airbnb.lottie.compose.rememberLottieComposition
 import com.pets.ui.theme.PetsTheme
+import com.pets.ui.theme.albanoRegular
 import com.pets.ui.theme.robotoRegular
 import com.pets.viewmodel.LoginEvent
 import com.pets.viewmodel.LoginStatus
@@ -79,6 +85,8 @@ fun MainComponent(
     val uiState = viewModel.uiState
     val handleEvent = viewModel::handleEvent
 
+    Log.d("MainComponent", "Status: ${uiState.status}")
+
     Column(
         modifier = Modifier
             .fillMaxSize(),
@@ -86,20 +94,26 @@ fun MainComponent(
         verticalArrangement = Arrangement.Center
     ) {
         when (uiState.status) {
-            LoginStatus.LOADER -> LoaderComponent(handleEvent)
             LoginStatus.NONE -> SplashScreenComponent(handleEvent)
-            LoginStatus.GO_TO_LOGIN -> LoginComponent(uiState, handleEvent)
+            LoginStatus.LOGIN -> LoginComponent(handleEvent)
+            LoginStatus.SUCCESS -> ListPetsComponent(handleEvent)
+            LoginStatus.LOADER,
+            LoginStatus.FAIL -> LoaderComponent(uiState, handleEvent)
         }
     }
 }
 
 @Composable
+fun ListPetsComponent(handleEvent: (event: LoginEvent) -> Unit) {
+
+}
+
+@Composable
 fun LoginComponent(
-    uiState: LoginUiState,
     handleEvent: (event: LoginEvent) -> Unit
 ) {
-    val textPassword by remember { mutableStateOf(TextFieldValue("")) }
-    val textEmail by remember { mutableStateOf(TextFieldValue("")) }
+    val textPassword = remember { mutableStateOf(TextFieldValue("")) }
+    val textEmail = remember { mutableStateOf(TextFieldValue("")) }
 
     Column(
         modifier = Modifier
@@ -160,7 +174,7 @@ fun LoginComponent(
                         .fillMaxWidth()
                         .background(Color.Transparent)
                         .padding(vertical = 4.dp, horizontal = 12.dp),
-                    textEmail,
+                    text = textEmail,
                     label = "E-mail"
                 )
 
@@ -184,6 +198,7 @@ fun LoginComponent(
             colors = ButtonDefaults.buttonColors(Color.Black),
             shape = RoundedCornerShape(8.dp),
             onClick = {
+                handleEvent(LoginEvent.OnLogin(textEmail.value.text, textPassword.value.text))
             }) {
             Text(text = "Login", color = Color.White)
         }
@@ -193,16 +208,15 @@ fun LoginComponent(
 @Composable
 private fun TextFieldComponent(
     modifier: Modifier,
-    textLogin: TextFieldValue,
+    text: MutableState<TextFieldValue>,
     label: String
 ) {
-    var textLogin1 = textLogin
     TextField(
         modifier = modifier,
         shape = RoundedCornerShape(8.dp),
-        value = textLogin1,
+        value = text.value,
         onValueChange = {
-            textLogin1 = it
+            text.value = it
         },
         label = { Text(text = label) },
         placeholder = { Text(text = label) },
@@ -218,19 +232,55 @@ private fun TextFieldComponent(
 
 @Composable
 fun LoaderComponent(
+    uiState: LoginUiState,
     handleEvent: (event: LoginEvent) -> Unit
 ) {
-    Column(
+    var isVisible by remember { mutableStateOf(false) }
+    LaunchedEffect(Unit) {
+        delay((0.5).seconds)
+        isVisible = true
+    }
+
+    ConstraintLayout(
         modifier = Modifier
             .fillMaxSize()
-            .background(color = colorResource(id = R.color.colorBgScreen))
+            .background(colorResource(id = R.color.colorBgScreen))
     ) {
-        LottieComponent(id = R.raw.dogs)
-        LaunchedEffect(Unit) {
-            delay(5.seconds)
-            handleEvent(LoginEvent.OnUpdateStatus(LoginStatus.GO_TO_LOGIN))
+        val (text, lottie) = createRefs()
+        when (uiState.status) {
+            LoginStatus.FAIL -> {
+                if(isVisible) {
+                    Text(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(bottom = 60.dp)
+                            .constrainAs(text) {
+                                start.linkTo(parent.start)
+                                end.linkTo(parent.end)
+                                bottom.linkTo(lottie.top)
+                            },
+                        text = "Usuário não \nencotrado!",
+                        fontSize = 36.sp,
+                        color = Color.Red,
+                        fontFamily = albanoRegular,
+                        textAlign = TextAlign.Center
+                    )
+                }
+
+                Column(modifier = Modifier.constrainAs(lottie) {
+                    start.linkTo(parent.start)
+                    end.linkTo(parent.end)
+                    bottom.linkTo(parent.bottom)
+                }) {
+                    LottieComponent(id = R.raw.cat_error)
+                }
+            }
+
+            else -> {}
         }
     }
+
+    OnReturnLogin(handleEvent)
 }
 
 @Composable
@@ -242,13 +292,20 @@ fun SplashScreenComponent(
             .fillMaxSize()
             .background(color = colorResource(id = R.color.colorBgScreen))
     ) {
-        Column(modifier = Modifier.padding(horizontal = 12.dp)) {
+        Column {
             LottieComponent(id = R.raw.dogs)
-            LaunchedEffect(Unit) {
-                delay(5.seconds)
-                handleEvent(LoginEvent.OnUpdateStatus(LoginStatus.GO_TO_LOGIN))
-            }
+            OnReturnLogin(handleEvent)
         }
+    }
+}
+
+@Composable
+private fun OnReturnLogin(
+    handleEvent: (event: LoginEvent) -> Unit
+) {
+    LaunchedEffect(Unit) {
+        delay(5.seconds)
+        handleEvent(LoginEvent.OnUpdateStatus(LoginStatus.LOGIN))
     }
 }
 
@@ -265,7 +322,6 @@ private fun LottieComponent(id: Int) {
 @Composable
 fun LoginPreview() {
     LoginComponent(
-        uiState = LoginUiState(status = LoginStatus.GO_TO_LOGIN),
         handleEvent = {}
     )
 }

@@ -1,11 +1,16 @@
 package com.pets.viewmodel
 
+import android.util.Log
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
+import com.google.gson.Gson
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.launch
 import javax.inject.Inject
+import kotlin.Exception
 
 @HiltViewModel
 class LoginViewModel @Inject constructor() : ViewModel() {
@@ -21,6 +26,29 @@ class LoginViewModel @Inject constructor() : ViewModel() {
             }
 
             LoginEvent.OnSuccess -> {}
+            is LoginEvent.OnLogin -> {
+                viewModelScope.launch { onExecuteLogin(event.email, event.password) }
+            }
+        }
+    }
+
+    private fun onExecuteLogin(email: String, password: String) {
+        Log.d("onExecuteLogin", "Execute login")
+
+        uiState = try {
+            val users = Gson().fromJson("", Array<Users>::class.java)
+            val filterUsers = users.filter { it.email == email && it.password == password }
+
+            if (filterUsers.isEmpty()) {
+                throw Exception("Usuário não encontrado!")
+            }
+
+            uiState.copy(status = LoginStatus.SUCCESS)
+        } catch (e: Exception) {
+            e.printStackTrace()
+            uiState.copy(
+                status = LoginStatus.FAIL
+            )
         }
     }
 }
@@ -31,6 +59,8 @@ data class LoginUiState(
 
 sealed class LoginEvent {
     data class OnUpdateStatus(val status: LoginStatus) : LoginEvent()
+    data class OnLogin(val email: String, val password: String) : LoginEvent()
+
     object OnSuccess : LoginEvent()
     object OnFail : LoginEvent()
 }
@@ -38,5 +68,9 @@ sealed class LoginEvent {
 enum class LoginStatus {
     NONE,
     LOADER,
-    GO_TO_LOGIN
+    LOGIN,
+    FAIL,
+    SUCCESS
 }
+
+data class Users(val email: String, val password: String)

@@ -12,3 +12,7 @@ val robotoRegular = FontFamily(
 val robotoLight = FontFamily(
     Font(R.font.roboto_light, FontWeight.Light)
 )
+
+val albanoRegular = FontFamily(
+    Font(R.font.agbalumo_regular, FontWeight.Bold)
+)
