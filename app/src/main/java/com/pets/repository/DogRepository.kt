@@ -8,9 +8,9 @@ import javax.inject.Inject
 class DogRepository @Inject constructor(
     private val service: DogService
 ): DogRepositoryInteface {
-    override suspend fun list(): Resource<List<DogResponse>?> {
+    override suspend fun list(page: Int, limit: Int): Resource<List<DogResponse>?> {
         return try {
-            Resource.returnResponse(service.list())
+            Resource.returnResponse(service.list(page = page, limit = limit))
         } catch (e: Exception) {
             e.printStackTrace()
             Resource.error(data = null, msg = e.message ?: "")

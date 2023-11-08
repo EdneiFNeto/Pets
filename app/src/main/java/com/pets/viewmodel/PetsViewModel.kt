@@ -5,12 +5,19 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import androidx.paging.ExperimentalPagingApi
+import androidx.paging.Pager
+import androidx.paging.PagingConfig
+import androidx.paging.PagingSource
+import androidx.paging.PagingState
+import androidx.paging.cachedIn
 import com.pets.preferences.PreferencesService
 import com.pets.repository.DogRepositoryInteface
 import com.pets.service.response.DogResponse
 import com.pets.ui.route.MainScreen
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.launch
+import retrofit2.HttpException
+import java.io.IOException
 import javax.inject.Inject
 
 @HiltViewModel
@@ -22,16 +29,8 @@ class PetsViewModel @Inject constructor(
     var uiState by mutableStateOf(PetsUiState())
         private set
 
-    init {
-        viewModelScope.launch {
-            uiState = uiState.copy(
-                dogs = repository.list().data ?: arrayListOf()
-            )
-        }
-    }
-
     fun handleEvent(event: PetsEvent) {
-        when(event) {
+        when (event) {
             is PetsEvent.OnBackCategoryScreen -> {
                 event.navigate(MainScreen.Category)
             }
@@ -42,6 +41,11 @@ class PetsViewModel @Inject constructor(
             }
         }
     }
+
+    val pager = Pager(
+        config = PagingConfig(pageSize = 10, prefetchDistance = 5),
+        pagingSourceFactory = { MyPagingSource(repository = repository) }
+    ).flow.cachedIn(viewModelScope)
 }
 
 data class PetsUiState(
@@ -50,6 +54,41 @@ data class PetsUiState(
 )
 
 sealed class PetsEvent {
-    data class OnBackCategoryScreen(val navigate: (MainScreen) -> Unit): PetsEvent()
-    data class OnLogout(val navigate: (MainScreen) -> Unit): PetsEvent()
+    data class OnBackCategoryScreen(val navigate: (MainScreen) -> Unit) : PetsEvent()
+    data class OnLogout(val navigate: (MainScreen) -> Unit) : PetsEvent()
+}
+
+class MyPagingSource(
+    private val repository: DogRepositoryInteface,
+) : PagingSource<Int, DogResponse>() {
+    override suspend fun load(params: LoadParams<Int>): LoadResult<Int, DogResponse> {
+        return try {
+            val prev = params.key ?: 1
+            val response = repository.list(page = prev, limit = params.loadSize)
+
+            if (response.data != null) {
+                LoadResult.Page(
+                    data = response.data,
+                    prevKey = if (prev == 0) null else prev - 1,
+                    nextKey = if (response.data.size < params.loadSize) null else prev + 1
+                )
+            } else {
+                LoadResult.Error(Exception(""))
+            }
+        } catch (e: IOException) {
+            e.printStackTrace()
+            LoadResult.Error(e)
+        } catch (e: HttpException) {
+            e.printStackTrace()
+            LoadResult.Error(e)
+        }
+    }
+
+    @ExperimentalPagingApi
+    override fun getRefreshKey(state: PagingState<Int, DogResponse>): Int? {
+        return state.anchorPosition?.let {
+            state.closestPageToPosition(it)?.prevKey?.plus(1)
+                ?: state.closestPageToPosition(it)?.nextKey?.minus(1)
+        }
+    }
 }
