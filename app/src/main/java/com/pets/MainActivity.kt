@@ -1,75 +1,31 @@
 package com.pets
 
 import android.os.Bundle
-import android.util.Patterns
+import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
-import androidx.compose.foundation.Image
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.text.KeyboardOptions
-import androidx.compose.foundation.verticalScroll
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Info
-import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.CardElevation
-import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
-import androidx.compose.material3.Text
-import androidx.compose.material3.TextField
-import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.MutableState
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.res.colorResource
-import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.text.input.KeyboardType
-import androidx.compose.ui.text.input.TextFieldValue
-import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
-import androidx.constraintlayout.compose.ConstraintLayout
-import androidx.hilt.navigation.compose.hiltViewModel
-import com.airbnb.lottie.compose.LottieAnimation
-import com.airbnb.lottie.compose.LottieCompositionSpec
-import com.airbnb.lottie.compose.LottieConstants
-import com.airbnb.lottie.compose.rememberLottieComposition
+import androidx.navigation.NavHostController
+import androidx.navigation.compose.NavHost
+import androidx.navigation.compose.composable
+import androidx.navigation.compose.rememberNavController
+import com.pets.ui.components.TopAppBarComponent
+import com.pets.ui.components.TopAppBarComponentState
+import com.pets.ui.components.rememberTopAppBarState
+import com.pets.ui.route.MainRoute
+import com.pets.ui.route.MainScreen
 import com.pets.ui.theme.PetsTheme
-import com.pets.ui.theme.albanoRegular
-import com.pets.ui.theme.robotoLight
-import com.pets.ui.theme.robotoRegular
-import com.pets.viewmodel.LoginEvent
-import com.pets.viewmodel.LoginStatus
-import com.pets.viewmodel.LoginUiState
-import com.pets.viewmodel.LoginViewModel
 import dagger.hilt.android.AndroidEntryPoint
-import kotlinx.coroutines.delay
-import kotlin.time.Duration.Companion.seconds
 
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
@@ -81,7 +37,7 @@ class MainActivity : ComponentActivity() {
                     modifier = Modifier.fillMaxSize(),
                     color = MaterialTheme.colorScheme.background
                 ) {
-                    MainComponent()
+                    MainScreenView()
                 }
             }
         }
@@ -89,426 +45,41 @@ class MainActivity : ComponentActivity() {
 }
 
 @Composable
-fun MainComponent(
-    viewModel: LoginViewModel = hiltViewModel()
-) {
-    val uiState = viewModel.uiState
-    val handleEvent = viewModel::handleEvent
+private fun MainScreenView() {
+    val navController = rememberNavController()
+    val topAppBarState = rememberTopAppBarState(title = MainScreen.Home.title)
 
-    Column(
-        modifier = Modifier
-            .fillMaxSize(),
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.Center
-    ) {
-        when (uiState.status) {
-            LoginStatus.NONE -> SplashScreenComponent(handleEvent)
-            LoginStatus.LOGIN -> LoginComponent(handleEvent)
-            LoginStatus.SUCCESS -> ListPetsComponent(uiState)
-            LoginStatus.LOADER,
-            LoginStatus.FAIL -> LoaderComponent(uiState, handleEvent)
+    LaunchedEffect(navController) {
+        navController.currentBackStackEntryFlow.collect { backStack ->
+            backStack.destination.route?.let { route ->
+                Log.i("HomeActivityLog", route)
+            }
         }
     }
-}
 
-@Composable
-fun ListPetsComponent(
-    uiState: LoginUiState
-) {
-    Row(
-        modifier = Modifier
-            .fillMaxSize()
-            .background(colorResource(id = R.color.colorBgScreen)),
-        horizontalArrangement = Arrangement.SpaceBetween,
-        verticalAlignment = Alignment.CenterVertically
-    ) {
-        Card(
-            elevation = CardDefaults.cardElevation(
-                defaultElevation = 10.dp
-            ),
-            modifier = Modifier
-                .weight(1f)
-                .padding(horizontal = 4.dp, vertical = 4.dp),
-            shape = RoundedCornerShape(8.dp),
-            colors = CardDefaults.cardColors(colorResource(id = R.color.white))
-        ) {
+    Scaffold(
+        topBar = { TopAppBarComponent(state = topAppBarState) },
+        content = { innerPadding ->
             Column(
                 modifier = Modifier
-                    .fillMaxWidth()
-                    .height(160.dp)
-                    .padding(12.dp),
-                horizontalAlignment = Alignment.CenterHorizontally,
-                verticalArrangement = Arrangement.Center
+                    .padding(innerPadding),
+                verticalArrangement = Arrangement.spacedBy(16.dp),
             ) {
-                Image(
-                    contentScale = ContentScale.Crop,
-                    modifier = Modifier
-                        .size(90.dp)
-                        .padding(horizontal = 4.dp),
-                    painter = painterResource(id = R.drawable.ic_dog),
-                    contentDescription = null
-                )
-
-                Text(
-                    text = "Dogs",
-                    color = Color.Black,
-                    fontSize = 18.sp,
-                    fontFamily = robotoRegular,
-                    textAlign = TextAlign.Start
-                )
+                Navigation(navController, topAppBarState)
             }
         }
-
-        Card(
-            elevation = CardDefaults.cardElevation(
-                defaultElevation = 10.dp
-            ),
-            modifier = Modifier
-                .weight(1f)
-                .padding(horizontal = 4.dp, vertical = 4.dp),
-            shape = RoundedCornerShape(8.dp),
-            colors = CardDefaults.cardColors(colorResource(id = R.color.white))
-        ) {
-            Column(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(160.dp)
-                    .padding(12.dp),
-                horizontalAlignment = Alignment.CenterHorizontally,
-                verticalArrangement = Arrangement.Center
-            ) {
-                Image(
-                    contentScale = ContentScale.Crop,
-                    modifier = Modifier
-                        .size(90.dp)
-                        .padding(horizontal = 4.dp),
-                    painter = painterResource(id = R.drawable.ic_card_cat),
-                    contentDescription = null
-                )
-
-                Text(
-                    text = "Cats",
-                    color = Color.Black,
-                    fontSize = 18.sp,
-                    fontFamily = robotoRegular,
-                    textAlign = TextAlign.Start
-                )
-            }
-        }
-    }
-}
-
-@Composable
-fun ListDogs(uiState: LoginUiState) {
-    uiState.pets.forEach {
-        Card(
-            elevation = CardDefaults.cardElevation(
-                defaultElevation = 10.dp
-            ),
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = 12.dp, vertical = 4.dp),
-            shape = RoundedCornerShape(8.dp),
-        ) {
-
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.Start,
-            ) {
-                Image(
-                    contentScale = ContentScale.Crop,
-                    modifier = Modifier
-                        .clip(CircleShape)
-                        .padding(top = 24.dp, start = 8.dp),
-                    painter = painterResource(id = R.drawable.ic_dog),
-                    contentDescription = null
-                )
-
-                Column(
-                    modifier = Modifier
-                        .padding(horizontal = 12.dp, vertical = 24.dp)
-                ) {
-                    Text(
-                        text = it.name,
-                        color = Color.Black,
-                        fontSize = 18.sp,
-                        fontFamily = robotoRegular,
-                        textAlign = TextAlign.Start
-                    )
-                    Text(
-                        text = "${it.age} de Idade",
-                        color = Color.Black,
-                        fontSize = 16.sp,
-                        fontFamily = robotoLight,
-                        textAlign = TextAlign.Start
-                    )
-                }
-            }
-        }
-    }
-}
-
-@Composable
-fun LoginComponent(
-    handleEvent: (event: LoginEvent) -> Unit
-) {
-    val textEmail = remember { mutableStateOf(TextFieldValue("")) }
-    var isErrorEmail by remember { mutableStateOf(false) }
-
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .background(colorResource(id = R.color.colorBgScreen))
-            .verticalScroll(rememberScrollState()),
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.Center
-    ) {
-        Image(
-            modifier = Modifier
-                .padding(vertical = 12.dp)
-                .size(120.dp),
-            painter = painterResource(id = R.drawable.ic_cat),
-            contentDescription = null
-        )
-
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(vertical = 12.dp),
-            horizontalArrangement = Arrangement.Center
-        ) {
-            Text(
-                text = "Pets",
-                color = Color.Black,
-                fontSize = 24.sp,
-                fontFamily = robotoRegular
-            )
-
-            Text(
-                text = "Medicine",
-                color = Color.White,
-                fontSize = 26.sp,
-                fontFamily = robotoRegular
-            )
-        }
-
-        Card(
-            colors = CardDefaults
-                .cardColors(colorResource(id = R.color.colorBgTextFieldLogin)),
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(vertical = 12.dp)
-                .padding(horizontal = 12.dp)
-        ) {
-            Column(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(200.dp)
-                    .padding(12.dp),
-                horizontalAlignment = Alignment.CenterHorizontally,
-                verticalArrangement = Arrangement.Center
-            ) {
-
-                TextFieldComponent(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .background(Color.Transparent)
-                        .padding(vertical = 4.dp, horizontal = 12.dp),
-                    text = textEmail,
-                    label = "E-mail",
-                    isError = isErrorEmail,
-                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email),
-                    onValueChange = {
-                        textEmail.value = it
-                        isErrorEmail = if (it.text.isNotEmpty())
-                            !Patterns.EMAIL_ADDRESS.matcher(it.text).matches()
-                        else
-                            false
-                    }
-                )
-
-                if (isErrorEmail) {
-                    Text(
-                        text = "Campo e-mail inválido!",
-                        color = Color.Red,
-                        modifier = Modifier.padding(start = 16.dp),
-                        textAlign = TextAlign.Start,
-                        fontFamily = robotoLight
-                    )
-                }
-            }
-        }
-
-        Button(
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(60.dp)
-                .offset(y = (-32).dp)
-                .padding(start = 36.dp, end = 36.dp),
-            colors = ButtonDefaults.buttonColors(Color.Black),
-            shape = RoundedCornerShape(8.dp),
-            onClick = {
-                if (!isErrorEmail) {
-                    handleEvent(
-                        LoginEvent.OnLogin(textEmail.value.text)
-                    )
-                } else {
-                    isErrorEmail = true
-                }
-            }) {
-            Text(text = "Login", color = Color.White)
-        }
-    }
-}
-
-@Composable
-private fun TextFieldComponent(
-    modifier: Modifier,
-    text: MutableState<TextFieldValue>,
-    label: String,
-    isError: Boolean,
-    keyboardOptions: KeyboardOptions,
-    onValueChange: (TextFieldValue) -> Unit
-) {
-    TextField(
-        modifier = modifier,
-        shape = RoundedCornerShape(8.dp),
-        value = text.value,
-        onValueChange = onValueChange,
-        label = { Text(text = label) },
-        placeholder = { Text(text = label) },
-        keyboardOptions = keyboardOptions,
-        colors = TextFieldDefaults.colors(
-            disabledPlaceholderColor = Color.Black,
-            disabledTextColor = Color.Black,
-            disabledLabelColor = Color.Black,
-            focusedContainerColor = Color.Transparent,
-            unfocusedContainerColor = Color.Transparent,
-            errorContainerColor = Color.Transparent,
-            errorTextColor = Color.Black,
-            focusedTextColor = Color.Black,
-            errorCursorColor = Color.Black,
-            errorLabelColor = Color.Black,
-            errorPlaceholderColor = Color.Black,
-            focusedLabelColor = Color.Black,
-            focusedPlaceholderColor = Color.Black,
-            unfocusedPlaceholderColor = Color.Black,
-            unfocusedLabelColor = Color.Black,
-            unfocusedTextColor = Color.Black,
-            errorSupportingTextColor = Color.Black
-        ),
-        trailingIcon = {
-            if (isError)
-                Icon(Icons.Filled.Info, "error", tint = Color.Red)
-        },
-        isError = isError,
     )
 }
 
 @Composable
-fun LoaderComponent(
-    uiState: LoginUiState,
-    handleEvent: (event: LoginEvent) -> Unit
+fun Navigation(
+    navController: NavHostController,
+    topAppBarState: TopAppBarComponentState
 ) {
-    var isVisible by remember { mutableStateOf(false) }
-    LaunchedEffect(Unit) {
-        delay((0.5).seconds)
-        isVisible = true
-    }
-
-    ConstraintLayout(
-        modifier = Modifier
-            .fillMaxSize()
-            .background(colorResource(id = R.color.colorBgScreen))
+    NavHost(
+        navController = navController,
+        startDestination = MainScreen.Home.route
     ) {
-        val (text, lottie) = createRefs()
-        when (uiState.status) {
-            LoginStatus.FAIL -> {
-                if (isVisible) {
-                    Text(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(bottom = 60.dp)
-                            .constrainAs(text) {
-                                start.linkTo(parent.start)
-                                end.linkTo(parent.end)
-                                bottom.linkTo(lottie.top)
-                            },
-                        text = "Usuário não \nencotrado!",
-                        fontSize = 36.sp,
-                        color = Color.Red,
-                        fontFamily = albanoRegular,
-                        textAlign = TextAlign.Center
-                    )
-                }
-
-                Column(modifier = Modifier.constrainAs(lottie) {
-                    start.linkTo(parent.start)
-                    end.linkTo(parent.end)
-                    bottom.linkTo(parent.bottom)
-                }) {
-                    LottieComponent(id = R.raw.cat_error)
-                }
-            }
-
-            LoginStatus.LOADER -> {
-                Column(modifier = Modifier.constrainAs(lottie) {
-                    start.linkTo(parent.start)
-                    end.linkTo(parent.end)
-                    bottom.linkTo(parent.bottom)
-                    top.linkTo(parent.top)
-                }) {
-                    LottieComponent(id = R.raw.ic_loading)
-                }
-            }
-
-            else -> {}
-        }
+        composable(MainScreen.Home.route) { MainRoute(topAppBarState) }
     }
-
-    OnReturnLogin(handleEvent)
-}
-
-@Composable
-fun SplashScreenComponent(
-    handleEvent: (event: LoginEvent) -> Unit
-) {
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .background(color = colorResource(id = R.color.colorBgScreen)),
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.Center
-    ) {
-        LottieComponent(id = R.raw.ic_loading)
-        OnReturnLogin(handleEvent)
-    }
-}
-
-@Composable
-private fun OnReturnLogin(
-    handleEvent: (event: LoginEvent) -> Unit
-) {
-    LaunchedEffect(Unit) {
-        delay(5.seconds)
-        handleEvent(LoginEvent.OnUpdateStatus(LoginStatus.LOGIN))
-    }
-}
-
-@Composable
-private fun LottieComponent(id: Int) {
-    val composition by rememberLottieComposition(LottieCompositionSpec.RawRes(id))
-
-    LottieAnimation(
-        composition = composition,
-        iterations = LottieConstants.IterateForever
-    )
-}
-
-@Preview(showBackground = true)
-@Composable
-fun LoginPreview() {
-    LoginComponent(
-        handleEvent = {}
-    )
 }
