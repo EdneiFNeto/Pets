@@ -1,6 +1,7 @@
 package com.pets.viewmodel
 
 import android.app.Application
+import android.os.Handler
 import android.os.Looper
 import android.util.Log
 import androidx.compose.runtime.getValue
@@ -10,6 +11,8 @@ import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
+import com.pets.preferences.PreferencesService
+import com.pets.ui.route.MainScreen
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch
 import java.io.IOException
@@ -17,7 +20,8 @@ import javax.inject.Inject
 
 @HiltViewModel
 class LoginViewModel @Inject constructor(
-    application: Application
+    private val preferences: PreferencesService,
+    application: Application,
 ) : AndroidViewModel(application) {
 
     private val context
@@ -59,41 +63,13 @@ class LoginViewModel @Inject constructor(
             is LoginEvent.OnLogin -> {
                 viewModelScope.launch {
                     uiState = uiState.copy(status = LoginStatus.LOADER)
-                    onExecuteLogin(event.email)
-                }
-            }
-
-            is LoginEvent.OnListPet -> {
-                uiState = when (event.pet) {
-                    Pet.CAT -> {
-                        uiState.copy(
-                            status = LoginStatus.LIST_PETS,
-                            pet = event.pet,
-                            dogs = arrayListOf(
-                                Pets(name = "Jhon - 1", age = 7),
-                                Pets(name = "Jhon - 2", age = 7),
-                                Pets(name = "Jhon - 3", age = 7),
-                            )
-                        )
-                    }
-
-                    Pet.DOG -> {
-                        uiState.copy(
-                            status = LoginStatus.LIST_PETS,
-                            pet = event.pet,
-                            cats = arrayListOf(
-                                Pets(name = "Jhon - 1", age = 7),
-                                Pets(name = "Jhon - 2", age = 7),
-                                Pets(name = "Jhon - 3", age = 7),
-                            )
-                        )
-                    }
+                    onExecuteLogin(event.email, event.navigate)
                 }
             }
         }
     }
 
-    private fun onExecuteLogin(email: String) {
+    private fun onExecuteLogin(email: String, navigate: (MainScreen) -> Unit) {
         Log.d("onExecuteLogin", "Execute login")
 
         try {
@@ -103,9 +79,11 @@ class LoginViewModel @Inject constructor(
                 throw Exception("Usuário não encontrado!")
             }
 
-            android.os.Handler(Looper.getMainLooper()).postDelayed({
-                uiState = uiState.copy(status = LoginStatus.CATEGORY_PETS)
-            }, 3000)
+            Handler(Looper.getMainLooper()).postDelayed({
+                preferences.setEmail(email)
+                navigate(MainScreen.Category)
+            }, 2000)
+
         } catch (e: Exception) {
             e.printStackTrace()
             uiState = uiState.copy(
@@ -116,28 +94,22 @@ class LoginViewModel @Inject constructor(
 }
 
 data class LoginUiState(
-    val status: LoginStatus = LoginStatus.NONE,
+    val status: LoginStatus = LoginStatus.LOGIN,
     val users: List<Users> = arrayListOf(),
-    val dogs: List<Pets> = arrayListOf(Pets(name = "Jhon", age = 7)),
-    val cats: List<Pets> = arrayListOf(Pets(name = "Jhon", age = 7)),
     val pet: Pet? = null
 )
 
 sealed class LoginEvent {
     data class OnUpdateStatus(val status: LoginStatus) : LoginEvent()
-    data class OnLogin(val email: String) : LoginEvent()
-    data class OnListPet(val pet: Pet) : LoginEvent()
+    data class OnLogin(val email: String, val navigate: (MainScreen) -> Unit) : LoginEvent()
     object OnSuccess : LoginEvent()
     object OnFail : LoginEvent()
 }
 
 enum class LoginStatus {
-    NONE,
     LOADER,
     LOGIN,
-    LIST_PETS,
-    FAIL,
-    CATEGORY_PETS
+    FAIL
 }
 
 enum class Pet {

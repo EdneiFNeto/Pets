@@ -12,8 +12,13 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ExitToApp
+import androidx.compose.material.icons.filled.Home
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -26,14 +31,45 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.pets.R
+import com.pets.ui.route.MainScreen
 import com.pets.ui.theme.robotoRegular
-import com.pets.viewmodel.LoginEvent
-import com.pets.viewmodel.Pet
+import com.pets.viewmodel.PetsEvent
 
 @Composable
 fun CategoryPetsComponent(
-    handleEvent: (event: LoginEvent) -> Unit
+    navigate: (MainScreen) -> Unit,
+    topAppBarState: TopAppBarComponentState,
+    handleEvent: (PetsEvent) -> Unit
 ) {
+    topAppBarState.apply {
+        title.value = ""
+        visibility.value = true
+        navigationIcon.value = {
+            IconButton(onClick = {}) {
+                Icon(
+                    Icons.Default.Home, null,
+                    tint = Color.White,
+                    modifier = Modifier.size(30.dp)
+                )
+            }
+        }
+
+        actions.value = {
+            IconButton(onClick = {
+                handleEvent(PetsEvent.OnLogout(navigate))
+            }) {
+                Icon(
+                    Icons.Filled.ExitToApp,
+                    "Exit",
+                    tint = Color.White,
+                    modifier = Modifier.size(30.dp)
+                )
+            }
+        }
+    }
+
+    BackHandlerComponent {}
+
     Row(
         modifier = Modifier
             .fillMaxSize()
@@ -49,7 +85,7 @@ fun CategoryPetsComponent(
                 .weight(1f)
                 .padding(horizontal = 4.dp, vertical = 4.dp)
                 .clickable {
-                    handleEvent(LoginEvent.OnListPet(Pet.DOG))
+                    navigate(MainScreen.Pets)
                 },
             shape = RoundedCornerShape(8.dp),
             colors = CardDefaults.cardColors(colorResource(id = R.color.white))
@@ -89,7 +125,7 @@ fun CategoryPetsComponent(
                 .weight(1f)
                 .padding(horizontal = 4.dp, vertical = 4.dp)
                 .clickable {
-                    handleEvent(LoginEvent.OnListPet(Pet.CAT))
+                    navigate(MainScreen.Pets)
                 },
             shape = RoundedCornerShape(8.dp),
             colors = CardDefaults.cardColors(colorResource(id = R.color.white))

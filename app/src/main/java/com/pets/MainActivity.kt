@@ -22,8 +22,11 @@ import androidx.navigation.compose.rememberNavController
 import com.pets.ui.components.TopAppBarComponent
 import com.pets.ui.components.TopAppBarComponentState
 import com.pets.ui.components.rememberTopAppBarState
-import com.pets.ui.route.MainRoute
+import com.pets.ui.route.CategoryRoute
+import com.pets.ui.route.LoginRoute
 import com.pets.ui.route.MainScreen
+import com.pets.ui.route.PetsRoute
+import com.pets.ui.route.SplashRoute
 import com.pets.ui.theme.PetsTheme
 import dagger.hilt.android.AndroidEntryPoint
 
@@ -47,7 +50,7 @@ class MainActivity : ComponentActivity() {
 @Composable
 private fun MainScreenView() {
     val navController = rememberNavController()
-    val topAppBarState = rememberTopAppBarState(title = MainScreen.Home.title)
+    val topAppBarState = rememberTopAppBarState(title = MainScreen.Login.title)
 
     LaunchedEffect(navController) {
         navController.currentBackStackEntryFlow.collect { backStack ->
@@ -76,10 +79,21 @@ fun Navigation(
     navController: NavHostController,
     topAppBarState: TopAppBarComponentState
 ) {
+    val navigate: (screen: MainScreen) -> Unit = { screen ->
+        navController.navigate(route = screen.route) {
+            if (screen.route == MainScreen.Login.route) {
+                popUpTo(MainScreen.Splash.route)
+            }
+        }
+    }
+
     NavHost(
         navController = navController,
-        startDestination = MainScreen.Home.route
+        startDestination = MainScreen.Splash.route
     ) {
-        composable(MainScreen.Home.route) { MainRoute(topAppBarState) }
+        composable(MainScreen.Splash.route) { SplashRoute(navigate, topAppBarState) }
+        composable(MainScreen.Login.route) { LoginRoute(navigate, topAppBarState) }
+        composable(MainScreen.Category.route) { CategoryRoute(navigate, topAppBarState) }
+        composable(MainScreen.Pets.route) { PetsRoute(navigate, topAppBarState) }
     }
 }

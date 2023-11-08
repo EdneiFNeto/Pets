@@ -1,40 +1,30 @@
 package com.pets.ui.components
 
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.res.colorResource
-import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
+import coil.compose.AsyncImage
+import coil.request.ImageRequest
 import com.pets.R
-import com.pets.ui.theme.robotoLight
-import com.pets.ui.theme.robotoRegular
-import com.pets.viewmodel.LoginUiState
-import com.pets.viewmodel.Pet
+import com.pets.viewmodel.PetsUiState
 
 @Composable
 fun ListPets(
-    uiState: LoginUiState
+    uiState: PetsUiState
 ) {
-    val pets = if (uiState.pet == Pet.DOG) uiState.dogs else uiState.cats
-
-    pets.forEach {
+    uiState.dogs.forEach {
         Card(
             elevation = CardDefaults.cardElevation(
                 defaultElevation = 10.dp
@@ -43,42 +33,25 @@ fun ListPets(
                 .fillMaxWidth()
                 .padding(horizontal = 12.dp, vertical = 4.dp),
             shape = RoundedCornerShape(8.dp),
-            colors = CardDefaults.cardColors(colorResource(id = R.color.white))
+            colors = CardDefaults.cardColors(Color.Transparent)
         ) {
             Row(
                 modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.Start,
+                horizontalArrangement = Arrangement.SpaceBetween,
             ) {
-                Image(
-                    contentScale = ContentScale.Crop,
-                    modifier = Modifier
-                        .clip(CircleShape)
-                        .padding(top = 24.dp, start = 8.dp),
-                    painter = if (uiState.pet == Pet.DOG) painterResource(id = R.drawable.ic_dog) else
-                        painterResource(id = R.drawable.ic_card_cat),
-                    contentDescription = null,
-                    alignment = Alignment.Center
-                )
 
-                Column(
+                AsyncImage(
+                    model = ImageRequest.Builder(LocalContext.current)
+                        .data(it.url)
+                        .placeholder(R.drawable.ic_loading)
+                        .build(),
+                    contentDescription = "Image pets",
                     modifier = Modifier
-                        .padding(horizontal = 12.dp, vertical = 24.dp)
-                ) {
-                    Text(
-                        text = it.name,
-                        color = Color.Black,
-                        fontSize = 18.sp,
-                        fontFamily = robotoRegular,
-                        textAlign = TextAlign.Start
-                    )
-                    Text(
-                        text = "${it.age} de Idade",
-                        color = Color.Black,
-                        fontSize = 16.sp,
-                        fontFamily = robotoLight,
-                        textAlign = TextAlign.Start
-                    )
-                }
+                        .fillMaxWidth()
+                        .height(160.dp)
+                        .clip(RoundedCornerShape(16.dp)),
+                    contentScale = ContentScale.Crop,
+                )
             }
         }
     }
