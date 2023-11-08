@@ -20,16 +20,20 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.pets.R
 import com.pets.ui.theme.robotoLight
 import com.pets.ui.theme.robotoRegular
-import com.pets.viewmodel.Pets
+import com.pets.viewmodel.LoginUiState
+import com.pets.viewmodel.Pet
 
 @Composable
-fun ListPets(pets: List<Pets>) {
+fun ListPets(
+    uiState: LoginUiState
+) {
+    val pets = if (uiState.pet == Pet.DOG) uiState.dogs else uiState.cats
+
     pets.forEach {
         Card(
             elevation = CardDefaults.cardElevation(
@@ -50,7 +54,8 @@ fun ListPets(pets: List<Pets>) {
                     modifier = Modifier
                         .clip(CircleShape)
                         .padding(top = 24.dp, start = 8.dp),
-                    painter = painterResource(id = R.drawable.ic_dog),
+                    painter = if (uiState.pet == Pet.DOG) painterResource(id = R.drawable.ic_dog) else
+                        painterResource(id = R.drawable.ic_card_cat),
                     contentDescription = null,
                     alignment = Alignment.Center
                 )
@@ -77,16 +82,4 @@ fun ListPets(pets: List<Pets>) {
             }
         }
     }
-}
-
-@Preview
-@Composable
-fun ListPetsPreview() {
-    ListPets(
-        pets = arrayListOf(
-            Pets(name = "Jhon - 1", age = 7),
-            Pets(name = "Jhon - 2", age = 7),
-            Pets(name = "Jhon - 3", age = 7)
-        )
-    )
 }
