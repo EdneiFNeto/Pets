@@ -1,5 +1,6 @@
 package com.pets.ui.components
 
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -24,21 +25,25 @@ import com.pets.service.response.CatResponse
 @Composable
 fun CardCat(
     items: LazyPagingItems<CatResponse>,
-    index: Int
+    index: Int,
+    handleEvent:(String) -> Unit
 ) {
     Card(
         elevation = CardDefaults.cardElevation(
-            defaultElevation = 10.dp
+            defaultElevation = 8.dp
         ),
         modifier = Modifier
             .fillMaxWidth()
-            .padding(horizontal = 12.dp, vertical = 4.dp),
+            .clickable { handleEvent(items[index]?.id ?: "") }
+            .padding(horizontal = 4.dp, vertical = 4.dp),
         shape = RoundedCornerShape(8.dp),
-        colors = CardDefaults.cardColors(Color.Transparent)
+        colors = CardDefaults.cardColors(Color.White)
     ) {
         Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.SpaceBetween,
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(4.dp),
+            horizontalArrangement = Arrangement.Center,
         ) {
             items[index]?.url?.let {
                 AsyncImage(
@@ -49,7 +54,7 @@ fun CardCat(
                     contentDescription = "Image pets",
                     modifier = Modifier
                         .fillMaxWidth()
-                        .height(160.dp)
+                        .height(400.dp)
                         .clip(RoundedCornerShape(16.dp)),
                     contentScale = ContentScale.Crop,
                 )

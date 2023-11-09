@@ -52,8 +52,9 @@ fun PetsRoute(
     ListPetsComponent(
         navController,
         topAppBarState,
+        id = id,
         handleEvent = viewModel::handleEvent,
-        id = id
+        uiState = viewModel.uiState
     )
 }
 
