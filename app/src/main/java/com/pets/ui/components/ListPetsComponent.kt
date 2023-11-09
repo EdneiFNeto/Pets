@@ -35,8 +35,7 @@ fun ListPetsComponent(
             IconButton(onClick = {
                 when (uiState.status) {
                     PetsStatus.NONE -> handleEvent(PetsEvent.OnBackCategoryScreen(navigate))
-                    PetsStatus.DETAIL -> handleEvent(PetsEvent.OnBackList)
-                    else -> {}
+                    else -> handleEvent(PetsEvent.OnBackList)
                 }
             }) {
                 Icon(

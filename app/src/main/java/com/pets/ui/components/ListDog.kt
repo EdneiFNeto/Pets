@@ -18,6 +18,7 @@ import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
@@ -39,6 +40,8 @@ import com.pets.viewmodel.PetsEvent
 import com.pets.viewmodel.PetsStatus
 import com.pets.viewmodel.PetsUiState
 import com.pets.viewmodel.PetsViewModel
+import kotlinx.coroutines.delay
+import kotlin.time.Duration.Companion.seconds
 
 @Composable
 fun ListDog(
@@ -182,7 +185,14 @@ fun ListDog(
                 }
             }
 
-            PetsStatus.FAIL -> {}
+            PetsStatus.FAIL -> {
+                LaunchedEffect(Unit) {
+                    delay((2).seconds)
+                    viewModel.handleEvent(PetsEvent.OnBackList)
+                }
+
+                FailComponent()
+            }
         }
     }
 
