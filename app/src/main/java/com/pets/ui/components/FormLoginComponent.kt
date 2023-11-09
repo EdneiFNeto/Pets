@@ -34,9 +34,11 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
+import androidx.navigation.compose.rememberNavController
 import com.pets.R
 import com.pets.ui.theme.robotoLight
 import com.pets.ui.theme.robotoRegular
@@ -62,7 +64,7 @@ fun FormLoginComponent(
             modifier = Modifier
                 .padding(vertical = 12.dp)
                 .size(120.dp),
-            painter = painterResource(id = R.drawable.ic_cat),
+            painter = painterResource(id = R.drawable.ic_logo),
             contentDescription = null
         )
 
@@ -73,14 +75,14 @@ fun FormLoginComponent(
             horizontalArrangement = Arrangement.Center
         ) {
             Text(
-                text = "Pets",
+                text = "Dogs",
                 color = Color.Black,
                 fontSize = 24.sp,
                 fontFamily = robotoRegular
             )
 
             Text(
-                text = "Medicine",
+                text = "Cats",
                 color = Color.White,
                 fontSize = 26.sp,
                 fontFamily = robotoRegular
@@ -98,7 +100,7 @@ fun FormLoginComponent(
             Column(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(200.dp)
+                    .height(120.dp)
                     .padding(12.dp),
                 horizontalAlignment = Alignment.CenterHorizontally,
                 verticalArrangement = Arrangement.Center
@@ -138,7 +140,7 @@ fun FormLoginComponent(
             modifier = Modifier
                 .fillMaxWidth()
                 .height(60.dp)
-                .offset(y = (-32).dp)
+                .offset(y = (-20).dp)
                 .padding(start = 36.dp, end = 36.dp),
             colors = ButtonDefaults.buttonColors(Color.Black),
             shape = RoundedCornerShape(8.dp),
@@ -154,4 +156,10 @@ fun FormLoginComponent(
             Text(text = "Login", color = Color.White)
         }
     }
+}
+
+@Preview
+@Composable
+fun LoginPreview() {
+    FormLoginComponent(handleEvent = {}, navigate = rememberNavController())
 }
