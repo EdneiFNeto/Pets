@@ -117,10 +117,6 @@ fun FormLoginComponent(
                     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email),
                     onValueChange = {
                         textEmail.value = it
-                        isErrorEmail = if (it.text.isNotEmpty())
-                            !Patterns.EMAIL_ADDRESS.matcher(it.text).matches()
-                        else
-                            false
                     }
                 )
 
