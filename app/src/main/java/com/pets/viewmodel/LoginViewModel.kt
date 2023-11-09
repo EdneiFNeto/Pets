@@ -9,6 +9,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
+import androidx.navigation.NavHostController
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
 import com.pets.preferences.PreferencesService
@@ -69,7 +70,7 @@ class LoginViewModel @Inject constructor(
         }
     }
 
-    private fun onExecuteLogin(email: String, navigate: (MainScreen) -> Unit) {
+    private fun onExecuteLogin(email: String, navHostController: NavHostController) {
         Log.d("onExecuteLogin", "Execute login")
 
         try {
@@ -81,7 +82,7 @@ class LoginViewModel @Inject constructor(
 
             Handler(Looper.getMainLooper()).postDelayed({
                 preferences.setEmail(email)
-                navigate(MainScreen.Category)
+                navHostController.navigate(MainScreen.Category.route)
             }, 2000)
 
         } catch (e: Exception) {
@@ -101,7 +102,7 @@ data class LoginUiState(
 
 sealed class LoginEvent {
     data class OnUpdateStatus(val status: LoginStatus) : LoginEvent()
-    data class OnLogin(val email: String, val navigate: (MainScreen) -> Unit) : LoginEvent()
+    data class OnLogin(val email: String, val navigate: NavHostController) : LoginEvent()
     object OnSuccess : LoginEvent()
     object OnFail : LoginEvent()
 }
@@ -112,9 +113,9 @@ enum class LoginStatus {
     FAIL
 }
 
-enum class Pet {
-    DOG,
-    CAT
+enum class Pet(val id: Int) {
+    DOG(1),
+    CAT(2)
 }
 
 data class Users(val email: String, val name: String)

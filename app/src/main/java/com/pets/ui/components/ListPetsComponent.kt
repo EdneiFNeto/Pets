@@ -1,5 +1,6 @@
 package com.pets.ui.components
 
+import android.util.Log
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
@@ -14,20 +15,26 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import androidx.navigation.NavHostController
 import com.pets.R
-import com.pets.ui.route.MainScreen
+import com.pets.viewmodel.Pet
 import com.pets.viewmodel.PetsEvent
-import com.pets.viewmodel.PetsUiState
 
 @Composable
 fun ListPetsComponent(
-    navigate: (MainScreen) -> Unit,
+    navigate: NavHostController,
     topAppBarState: TopAppBarComponentState,
-    uiState: PetsUiState,
-    handleEvent: (PetsEvent) -> Unit
+    handleEvent: (PetsEvent) -> Unit,
+    id: Int
 ) {
+    Log.d("ListPetsComponent", "ListPets: $id")
+
     topAppBarState.apply {
-        title.value = stringResource(id = R.string.title_list_cats)
+        title.value = when(id) {
+            Pet.CAT.id -> stringResource(id = R.string.title_list_cats)
+            else -> stringResource(id = R.string.title_list_dogs)
+        }
+
         navigationIcon.value = {
             IconButton(onClick = {
                 handleEvent(PetsEvent.OnBackCategoryScreen(navigate))
@@ -47,6 +54,9 @@ fun ListPetsComponent(
             .fillMaxSize()
             .background(colorResource(id = R.color.primaryColor))
     ) {
-        ListPets()
+        when(id) {
+            Pet.DOG.id -> ListDog()
+            else -> ListCat()
+        }
     }
 }

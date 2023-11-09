@@ -1,7 +1,10 @@
 package com.pets.di
 
+import com.pets.repository.CatRepository
+import com.pets.repository.CatRepositoryInterface
 import com.pets.repository.DogRepository
-import com.pets.repository.DogRepositoryInteface
+import com.pets.repository.DogRepositoryInterface
+import com.pets.service.CatService
 import com.pets.service.DogService
 import dagger.Module
 import dagger.Provides
@@ -15,10 +18,19 @@ object AppModuleRepository {
 
     @Singleton
     @Provides
-    fun injectCreateAccountRepositoty(
+    fun injectDogRepository(
         service: DogService
     ) =
         DogRepository(
             service,
-        ) as DogRepositoryInteface
+        ) as DogRepositoryInterface
+
+    @Singleton
+    @Provides
+    fun injectCreateAccountRepositoty(
+        service: CatService
+    ) =
+        CatRepository(
+            service,
+        ) as CatRepositoryInterface
 }

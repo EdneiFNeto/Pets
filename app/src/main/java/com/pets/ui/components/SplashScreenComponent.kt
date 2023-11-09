@@ -10,6 +10,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.colorResource
+import androidx.navigation.NavHostController
 import com.pets.R
 import com.pets.preferences.PreferencesServiceImpl
 import com.pets.ui.route.MainScreen
@@ -18,7 +19,7 @@ import kotlin.time.Duration.Companion.seconds
 
 @Composable
 fun SplashScreenComponent(
-    navigate: (MainScreen) -> Unit,
+    navHostController: NavHostController,
     topAppBarState: TopAppBarComponentState
 ) {
     topAppBarState.title.value = ""
@@ -37,9 +38,9 @@ fun SplashScreenComponent(
         LaunchedEffect(this) {
             delay(3.seconds)
             if (preferences.getEmail() != null) {
-                navigate(MainScreen.Category)
+                navHostController.navigate(MainScreen.Category.route)
             } else {
-                navigate(MainScreen.Login)
+                navHostController.navigate(MainScreen.Login.route)
             }
         }
     }

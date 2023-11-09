@@ -1,12 +1,14 @@
 package com.pets.service
 
-import com.pets.service.request.CatRequest
 import com.pets.service.response.CatResponse
 import retrofit2.Response
-import retrofit2.http.Body
-import retrofit2.http.POST
+import retrofit2.http.GET
+import retrofit2.http.Query
 
 interface CatService {
-    @POST("Commodity/Listar")
-    suspend fun listar(@Body request: CatRequest): Response<List<CatResponse>>
+    @GET("v1/images/search")
+    suspend fun list(
+        @Query("page") page: Int,
+        @Query("limit") limit: Int
+    ): Response<List<CatResponse>>
 }

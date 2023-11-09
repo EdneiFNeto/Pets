@@ -36,8 +36,8 @@ import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.navigation.NavHostController
 import com.pets.R
-import com.pets.ui.route.MainScreen
 import com.pets.ui.theme.robotoLight
 import com.pets.ui.theme.robotoRegular
 import com.pets.viewmodel.LoginEvent
@@ -45,7 +45,7 @@ import com.pets.viewmodel.LoginEvent
 @Composable
 fun FormLoginComponent(
     handleEvent: (event: LoginEvent) -> Unit,
-    navigate: (MainScreen) -> Unit
+    navigate: NavHostController
 ) {
     val textEmail = remember { mutableStateOf(TextFieldValue("")) }
     var isErrorEmail by remember { mutableStateOf(false) }

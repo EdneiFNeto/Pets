@@ -30,14 +30,16 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.navigation.NavHostController
 import com.pets.R
 import com.pets.ui.route.MainScreen
 import com.pets.ui.theme.robotoRegular
+import com.pets.viewmodel.Pet
 import com.pets.viewmodel.PetsEvent
 
 @Composable
 fun CategoryPetsComponent(
-    navigate: (MainScreen) -> Unit,
+    navHostController: NavHostController,
     topAppBarState: TopAppBarComponentState,
     handleEvent: (PetsEvent) -> Unit
 ) {
@@ -56,7 +58,7 @@ fun CategoryPetsComponent(
 
         actions.value = {
             IconButton(onClick = {
-                handleEvent(PetsEvent.OnLogout(navigate))
+                handleEvent(PetsEvent.OnLogout(navHostController))
             }) {
                 Icon(
                     Icons.Filled.ExitToApp,
@@ -85,7 +87,7 @@ fun CategoryPetsComponent(
                 .weight(1f)
                 .padding(horizontal = 4.dp, vertical = 4.dp)
                 .clickable {
-                    navigate(MainScreen.Pets)
+                    navHostController.navigate("${MainScreen.Pets.route}/${Pet.DOG.id}")
                 },
             shape = RoundedCornerShape(8.dp),
             colors = CardDefaults.cardColors(colorResource(id = R.color.white))
@@ -125,7 +127,7 @@ fun CategoryPetsComponent(
                 .weight(1f)
                 .padding(horizontal = 4.dp, vertical = 4.dp)
                 .clickable {
-                    navigate(MainScreen.Pets)
+                    navHostController.navigate("${MainScreen.Pets.route}/${Pet.CAT.id}")
                 },
             shape = RoundedCornerShape(8.dp),
             colors = CardDefaults.cardColors(colorResource(id = R.color.white))

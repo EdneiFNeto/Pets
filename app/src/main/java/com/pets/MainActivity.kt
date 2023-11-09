@@ -15,10 +15,11 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import androidx.navigation.NavHostController
+import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import androidx.navigation.navArgument
 import com.pets.ui.components.TopAppBarComponent
 import com.pets.ui.components.TopAppBarComponentState
 import com.pets.ui.components.rememberTopAppBarState
@@ -68,7 +69,7 @@ private fun MainScreenView() {
                     .padding(innerPadding),
                 verticalArrangement = Arrangement.spacedBy(16.dp),
             ) {
-                Navigation(navController, topAppBarState)
+                Navigation(topAppBarState)
             }
         }
     )
@@ -76,24 +77,35 @@ private fun MainScreenView() {
 
 @Composable
 fun Navigation(
-    navController: NavHostController,
     topAppBarState: TopAppBarComponentState
 ) {
-    val navigate: (screen: MainScreen) -> Unit = { screen ->
-        navController.navigate(route = screen.route) {
-            if (screen.route == MainScreen.Login.route) {
-                popUpTo(MainScreen.Splash.route)
-            }
-        }
-    }
+    val navController = rememberNavController()
 
     NavHost(
         navController = navController,
         startDestination = MainScreen.Splash.route
     ) {
-        composable(MainScreen.Splash.route) { SplashRoute(navigate, topAppBarState) }
-        composable(MainScreen.Login.route) { LoginRoute(navigate, topAppBarState) }
-        composable(MainScreen.Category.route) { CategoryRoute(navigate, topAppBarState) }
-        composable(MainScreen.Pets.route) { PetsRoute(navigate, topAppBarState) }
+        composable(MainScreen.Splash.route) {
+            SplashRoute(navController, topAppBarState)
+        }
+
+        composable(MainScreen.Login.route) {
+            LoginRoute(navController, topAppBarState)
+        }
+
+        composable(MainScreen.Category.route) {
+            CategoryRoute(navController, topAppBarState)
+        }
+
+        composable(
+            "${MainScreen.Pets.route}/{petId}",
+            arguments = listOf(navArgument("petId") { type = NavType.IntType })
+        ) { backStackEntry ->
+            PetsRoute(
+                navController = navController,
+                topAppBarState = topAppBarState,
+                id = backStackEntry.arguments?.getInt("petId") ?: 0
+            )
+        }
     }
 }

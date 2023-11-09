@@ -4,5 +4,8 @@ import com.google.gson.annotations.SerializedName
 import java.io.Serializable
 
 data class CatResponse(
-    @SerializedName("name") val name: String
+    @SerializedName("id") val id: String?,
+    @SerializedName("url") val url: String?,
+    @SerializedName("width") val width: Long?,
+    @SerializedName("height") val height: Long?
 ) : Serializable

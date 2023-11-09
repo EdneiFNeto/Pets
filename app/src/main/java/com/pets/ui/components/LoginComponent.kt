@@ -8,15 +8,15 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.colorResource
+import androidx.navigation.NavHostController
 import com.pets.R
-import com.pets.ui.route.MainScreen
 import com.pets.viewmodel.LoginEvent
 import com.pets.viewmodel.LoginStatus
 import com.pets.viewmodel.LoginUiState
 
 @Composable
 fun LoginComponent(
-    navigate: (MainScreen) -> Unit,
+    navigate: NavHostController,
     topAppBarState: TopAppBarComponentState,
     uiState: LoginUiState,
     handleEvent: (LoginEvent) -> Unit

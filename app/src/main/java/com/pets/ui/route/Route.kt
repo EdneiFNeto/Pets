@@ -2,6 +2,7 @@ package com.pets.ui.route
 
 import androidx.compose.runtime.Composable
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.navigation.NavHostController
 import com.pets.ui.components.CategoryPetsComponent
 import com.pets.ui.components.ListPetsComponent
 import com.pets.ui.components.LoginComponent
@@ -12,7 +13,7 @@ import com.pets.viewmodel.PetsViewModel
 
 @Composable
 fun SplashRoute(
-    navigate: (MainScreen) -> Unit,
+    navigate: NavHostController,
     topAppBarState: TopAppBarComponentState
 ) {
     SplashScreenComponent(navigate, topAppBarState)
@@ -20,7 +21,7 @@ fun SplashRoute(
 
 @Composable
 fun LoginRoute(
-    navigate: (MainScreen) -> Unit,
+    navigate: NavHostController,
     topAppBarState: TopAppBarComponentState,
     viewModel: LoginViewModel = hiltViewModel()
 ) {
@@ -34,7 +35,7 @@ fun LoginRoute(
 
 @Composable
 fun CategoryRoute(
-    navigate: (MainScreen) -> Unit,
+    navigate: NavHostController,
     topAppBarState: TopAppBarComponentState,
     viewModel: PetsViewModel = hiltViewModel()
 ) {
@@ -43,15 +44,16 @@ fun CategoryRoute(
 
 @Composable
 fun PetsRoute(
-    navigate: (MainScreen) -> Unit,
+    navController: NavHostController,
     topAppBarState: TopAppBarComponentState,
-    viewModel: PetsViewModel = hiltViewModel()
+    viewModel: PetsViewModel = hiltViewModel(),
+    id: Int
 ) {
     ListPetsComponent(
-        navigate,
+        navController,
         topAppBarState,
-        uiState = viewModel.uiState,
-        handleEvent = viewModel::handleEvent
+        handleEvent = viewModel::handleEvent,
+        id = id
     )
 }
 
