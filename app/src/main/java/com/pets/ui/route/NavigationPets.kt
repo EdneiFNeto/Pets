@@ -30,14 +30,10 @@ fun Navigation(
             CategoryRoute(navController, topAppBarState)
         }
 
-        composable(
-            "${MainScreen.Pets.route}/{petId}",
-            arguments = listOf(navArgument("petId") { type = NavType.IntType })
-        ) { backStackEntry ->
+        composable(MainScreen.Pets.route) {
             PetsRoute(
                 navController = navController,
                 topAppBarState = topAppBarState,
-                id = backStackEntry.arguments?.getInt("petId") ?: 0
             )
         }
     }

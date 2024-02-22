@@ -1,6 +1,5 @@
 package com.pets.ui.components.pets.dog
 
-import android.util.Log
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -25,6 +24,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.colorResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -33,6 +33,8 @@ import coil.request.ImageRequest
 import com.pets.R
 import com.pets.data.api.DogResponse
 import com.pets.ui.components.error.FailComponent
+import com.pets.ui.components.global.ScreenShimmerViewListComponent
+import com.pets.ui.theme.albanoRegular
 import com.pets.ui.theme.robotoLight
 import com.pets.ui.theme.robotoRegular
 import com.pets.ui.viewmodel.pets.PetsEvent
@@ -44,7 +46,7 @@ import kotlin.time.Duration.Companion.seconds
 @Composable
 fun ListDog(
     uiState: PetsUiState,
-    handleEvent:(PetsEvent) -> Unit
+    handleEvent: (PetsEvent) -> Unit
 ) {
 
     val dogs: List<DogResponse> = uiState.dogResponse
@@ -53,8 +55,6 @@ fun ListDog(
             .fillMaxSize()
             .background(colorResource(id = R.color.primaryColor))
     ) {
-        Log.d("ListDog", "Status: ${uiState.status}")
-
         when (uiState.status) {
             PetsStatus.NONE -> {
                 LazyVerticalGrid(
@@ -95,49 +95,42 @@ fun ListDog(
                                     .data(uiState.breeds?.url)
                                     .placeholder(R.drawable.ic_loading)
                                     .build(),
-                                contentDescription = "Image pets",
+                                contentDescription = stringResource(id = R.string.label_pets),
+                                contentScale = ContentScale.FillBounds,
                                 modifier = Modifier
+                                    .height(250.dp)
                                     .fillMaxWidth()
-                                    .height(400.dp)
                                     .clip(RoundedCornerShape(16.dp)),
-                                contentScale = ContentScale.Crop,
                             )
 
                             uiState.breeds?.breeds?.forEach {
-                                Row(
+                                Text(
+                                    text = it.name ?: "",
+                                    color = Color.Black,
+                                    fontSize = 16.sp,
+                                    fontFamily = robotoRegular,
                                     modifier = Modifier
                                         .fillMaxWidth()
-                                        .padding(vertical = 12.dp),
-                                    horizontalArrangement = Arrangement.Start
-                                ) {
-                                    Text(
-                                        text = it.name ?: "",
-                                        color = Color.Black,
-                                        fontSize = 26.sp,
-                                        fontFamily = robotoRegular,
-                                        modifier = Modifier
-                                            .weight(1f)
-                                            .padding(top = 18.dp),
-                                        textAlign = TextAlign.Start
-                                    )
+                                        .padding(top = 18.dp),
+                                    textAlign = TextAlign.Start
+                                )
 
-                                    Text(
-                                        text = "Life Span: ${(it.life_span ?: "")}",
-                                        color = Color.Black,
-                                        fontSize = 26.sp,
-                                        fontFamily = robotoRegular,
-                                        modifier = Modifier
-                                            .weight(1f)
-                                            .padding(top = 18.dp),
-                                        textAlign = TextAlign.End
-                                    )
-                                }
+                                Text(
+                                    text = "Life Span: ${(it.life_span ?: "")}",
+                                    color = Color.Black,
+                                    fontSize = 16.sp,
+                                    fontFamily = robotoLight,
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .padding(top = 18.dp),
+                                    textAlign = TextAlign.End
+                                )
 
                                 Text(
                                     text = "Temperament: ${(it.temperament ?: "")}",
                                     color = Color.Black,
-                                    fontSize = 26.sp,
-                                    fontFamily = robotoRegular,
+                                    fontSize = 16.sp,
+                                    fontFamily = albanoRegular,
                                     modifier = Modifier
                                         .fillMaxWidth()
                                         .padding(vertical = 4.dp),
@@ -147,8 +140,7 @@ fun ListDog(
                                 Text(
                                     text = it.description ?: "",
                                     color = Color.Black,
-                                    fontSize = 26.sp,
-                                    fontFamily = robotoLight,
+                                    fontSize = 16.sp,
                                     modifier = Modifier
                                         .fillMaxWidth()
                                         .padding(vertical = 4.dp),
@@ -168,7 +160,10 @@ fun ListDog(
 
                 FailComponent()
             }
+
+            PetsStatus.LOADER -> {
+                ScreenShimmerViewListComponent()
+            }
         }
     }
-
 }

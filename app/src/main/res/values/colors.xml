@@ -8,5 +8,6 @@
     <color name="black">#FF000000</color>
     <color name="colorBgTextFieldLogin">#daeff2</color>
     <color name="primaryColor">#00a9b8</color>
+    <color name="secundaryColor">#011719</color>
     <color name="white">#FFFFFFFF</color>
 </resources>

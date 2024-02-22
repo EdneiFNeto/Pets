@@ -3,8 +3,7 @@
 Aplicativo desenvolvido na plataforma `Android`. Como já atuo no mercado de trabalho a mais de 10 anos, eu me sinto mais confortável em desenvolver nesta plataforma.
 
 - Lista de gatos e cães utilizando a Apis:
-  - [Dogs](https://www.thedogapi.com/)
-  - [Cats](https://thecatapi.com/)
+- [Dogs](https://www.thedogapi.com/)
 
 ## Passo - 1
 

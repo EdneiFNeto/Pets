@@ -46,8 +46,7 @@ fun CategoryRoute(
 fun PetsRoute(
     navController: NavHostController,
     topAppBarState: TopAppBarComponentState,
-    viewModel: PetsViewModel = hiltViewModel(),
-    id: Int
+    viewModel: PetsViewModel = hiltViewModel()
 ) {
     ListPetsComponent(
         navController,

@@ -37,7 +37,6 @@ import com.pets.ui.components.global.BackHandlerComponent
 import com.pets.ui.components.global.TopAppBarComponentState
 import com.pets.ui.route.MainScreen
 import com.pets.ui.theme.robotoRegular
-import com.pets.ui.viewmodel.pets.Pet
 import com.pets.ui.viewmodel.pets.PetsEvent
 
 @Composable
@@ -87,9 +86,9 @@ fun CategoryPetsComponent(
             ),
             modifier = Modifier
                 .weight(1f)
-                .padding(horizontal = 4.dp, vertical = 4.dp)
+                .padding(horizontal = 8.dp, vertical = 4.dp)
                 .clickable {
-                    navHostController.navigate("${MainScreen.Pets.route}/${Pet.DOG.id}")
+                    navHostController.navigate(MainScreen.Pets.route)
                 },
             shape = RoundedCornerShape(8.dp),
             colors = CardDefaults.cardColors(colorResource(id = R.color.white))

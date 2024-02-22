@@ -5,6 +5,6 @@ import com.pets.data.api.BreedsResponse
 import com.pets.data.api.DogResponse
 
 interface DogRepositoryInterface {
-    suspend fun list(page: Int, limit: Int): Resource<List<DogResponse>?>
+    suspend fun list(): Resource<List<DogResponse>?>
     suspend fun detail(id: String) : Resource<BreedsResponse?>
 }

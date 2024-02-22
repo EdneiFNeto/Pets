@@ -72,7 +72,7 @@ class LoginViewModel @Inject constructor(
     }
 
     private fun onExecuteLogin(email: String, navHostController: NavHostController) {
-        Log.d("onExecuteLogin", "Execute login")
+        Log.d(TAG, "Execute login")
 
         try {
             val filterUsers = uiState.users.filter { it.email == email }

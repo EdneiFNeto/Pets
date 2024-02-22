@@ -6,6 +6,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
@@ -15,6 +16,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
 import coil.request.ImageRequest
@@ -25,7 +27,7 @@ import com.pets.data.api.DogResponse
 fun CardDog(
     items: List<DogResponse>,
     index: Int,
-    handleEvent:(DogResponse) -> Unit
+    handleEvent: (DogResponse) -> Unit
 ) {
     Card(
         elevation = CardDefaults.cardElevation(
@@ -48,12 +50,12 @@ fun CardDog(
                         .data(it)
                         .placeholder(R.drawable.ic_loading)
                         .build(),
-                    contentDescription = "Image pets",
+                    contentDescription = stringResource(R.string.label_image_pets),
+                    contentScale = ContentScale.FillBounds,
                     modifier = Modifier
+                        .height(250.dp)
                         .fillMaxWidth()
-                        .height(400.dp)
                         .clip(RoundedCornerShape(16.dp)),
-                    contentScale = ContentScale.Crop,
                 )
             }
         }

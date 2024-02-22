@@ -10,4 +10,5 @@
     <string name="label_pets">Pets</string>
     <string name="label_exit">Exit</string>
     <string name="label_dogs">Dogs</string>
+    <string name="label_image_pets">Image pets</string>
 </resources>

@@ -8,9 +8,8 @@ import retrofit2.http.Query
 interface DogService {
     @GET("v1/images/search")
     suspend fun list(
-        @Query("page") page: Int,
-        @Query("limit") limit: Int,
-        @Query("has_breeds") has_breeds: Int = 1
+        @Query("limit") limit: Int = 10,
+        @Query("has_breeds") hasBreeds: Int = 1
     ): Response<List<DogResponse>>
 
     @GET("v1/images/{id}")

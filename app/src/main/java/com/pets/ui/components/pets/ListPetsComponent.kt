@@ -43,6 +43,5 @@ fun ListPetsComponent(
         }
         actions.value = {}
     }
-
     ListDog(uiState, handleEvent)
 }
