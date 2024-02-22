@@ -3,13 +3,13 @@ package com.pets.ui.route
 import androidx.compose.runtime.Composable
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
-import com.pets.ui.components.CategoryPetsComponent
-import com.pets.ui.components.ListPetsComponent
-import com.pets.ui.components.LoginComponent
-import com.pets.ui.components.SplashScreenComponent
-import com.pets.ui.components.TopAppBarComponentState
-import com.pets.viewmodel.LoginViewModel
-import com.pets.viewmodel.PetsViewModel
+import com.pets.ui.components.global.TopAppBarComponentState
+import com.pets.ui.components.login.LoginComponent
+import com.pets.ui.components.pets.CategoryPetsComponent
+import com.pets.ui.components.pets.ListPetsComponent
+import com.pets.ui.components.splashscreen.SplashScreenComponent
+import com.pets.ui.viewmodel.login.LoginViewModel
+import com.pets.ui.viewmodel.pets.PetsViewModel
 
 @Composable
 fun SplashRoute(
@@ -46,13 +46,11 @@ fun CategoryRoute(
 fun PetsRoute(
     navController: NavHostController,
     topAppBarState: TopAppBarComponentState,
-    viewModel: PetsViewModel = hiltViewModel(),
-    id: Int
+    viewModel: PetsViewModel = hiltViewModel()
 ) {
     ListPetsComponent(
         navController,
         topAppBarState,
-        id = id,
         handleEvent = viewModel::handleEvent,
         uiState = viewModel.uiState
     )
