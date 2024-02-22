@@ -1,7 +1,6 @@
 package com.pets.di
 
-import com.pets.service.CatService
-import com.pets.service.DogService
+import com.pets.data.api.DogService
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -40,7 +39,6 @@ object AppNetworkDogModule {
 
     @Singleton
     @Provides
-    @Named("DogApi")
     fun provideRetrofitService(okHttpClient: OkHttpClient): Retrofit =
         Retrofit.Builder()
             .baseUrl("https://api.thedogapi.com/")
@@ -50,21 +48,6 @@ object AppNetworkDogModule {
 
     @Singleton
     @Provides
-    fun provideDogService(@Named("DogApi") retrofit: Retrofit): DogService =
+    fun provideDogService(retrofit: Retrofit): DogService =
         retrofit.create(DogService::class.java)
-
-    @Singleton
-    @Provides
-    @Named("CatApi")
-    fun provideRetrofitCatService(okHttpClient: OkHttpClient): Retrofit =
-        Retrofit.Builder()
-            .baseUrl("https://api.thecatapi.com/")
-            .addConverterFactory(GsonConverterFactory.create())
-            .client(okHttpClient)
-            .build()
-
-    @Singleton
-    @Provides
-    fun provideCatService(@Named("CatApi") retrofit: Retrofit): CatService =
-        retrofit.create(CatService::class.java)
 }

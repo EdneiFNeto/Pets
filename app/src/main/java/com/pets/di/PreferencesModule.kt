@@ -1,7 +1,7 @@
 package com.pets.di
 
-import com.pets.preferences.PreferencesService
-import com.pets.preferences.PreferencesServiceImpl
+import com.pets.utils.PreferencesService
+import com.pets.utils.PreferencesServiceImpl
 import dagger.Binds
 import dagger.Module
 import dagger.hilt.InstallIn
